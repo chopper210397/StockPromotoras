@@ -1,0 +1,75 @@
+#librerias usadas
+
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(lubridate)
+library(readxl)
+
+#leyendo xlsx
+promotora<-read_xlsx("C:/Users/User/Downloads/Libro2.xlsx")
+
+#revisando data
+head(promotora)
+
+#transformando datos
+promotora<-promotora %>% 
+  select(-`Tipo Mov`)
+
+promotora<-promotora %>% 
+  select(-`Guia`)
+
+promotora<-promotora %>% 
+  select(-`Tipo`) %>% 
+  select(-`Codclie`) %>% 
+  select(-`Cod Prod`) %>% 
+  select(-Lote)
+
+promotora<-promotora %>% 
+  rename( Fecha=`Fecha Doc`)
+
+promotora$Cantidad<-as.numeric(promotora$Cantidad)
+
+#creando nuevo data frame para no malograr el que ya tenia porque lo malogre varias veces xD
+fechasa<-as.Date(promotora$Fecha,"%d/%m/%Y")
+fechasa<-as.data.frame(fechasa)
+
+#ordenando las fechas de mas antiguo a mas moderno
+fechasa<- fechasa %>% 
+  arrange(fechasa)
+  
+#generando graficos
+ggplot(data = promotora, mapping = aes(x= fechasa$fechasa , y=Cantidad ))+geom_point()
+
+#group and summarize
+resumen<-promotora %>%  group_by(Cliente) %>% 
+  summarise(mean = mean(Cantidad), sum = sum(Cantidad), n = n())
+
+ggplot(data=promotora, aes(y=Cliente, x=Cantidad)) + 
+  geom_bar(stat="identity", position="stack",fill="steelblue", width = 0.3)+
+  labs(title = "Promotora", x="Cantidad", y="")+
+  theme(text = element_text(color = "blue"))
+  
+  
+
+ggplot(data=resumen, aes(x=Cliente, y=sum)) + 
+  geom_bar(stat="identity", position="stack")
+
+ggplot(data = promotora,mapping = aes(x=Cliente))+
+  geom_bar(position = "dodge", aes(fill=factor(Cantidad)))
+  
+#######################################################################
+##  bonito grafico que muestra el Stock brindado a cada promotora    ##                   
+##  en lo que va del año , year to date                              ## 
+#######################################################################
+
+ggplot(data = promotora,aes(x=Cliente, y=Cantidad))+ 
+  geom_bar(stat = "identity",aes(fill=Cliente),width = 0.7)+
+  theme(legend.position = "bottom",
+        axis.title.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.title.y = element_blank(),
+        legend.title = element_blank())+
+  labs(title = "Stock por Promotora")
+
