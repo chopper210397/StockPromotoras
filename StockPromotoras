@@ -1,3 +1,8 @@
+################################################
+# TRABAJANDO CON LA DATA RECOLECTADA MES A MES #
+#  SOBRE EL STOCK ENTREGADO A LAS PROMOTORAS   #
+################################################
+
 #librerias usadas
 
 library(dplyr)
